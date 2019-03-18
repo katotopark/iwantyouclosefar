@@ -1,17 +1,36 @@
 <template>
   <el-row type="flex" justify="center">
-    <el-col ref="wrapper" :xs="20" :md="12">
-      <h3 :style="{ color: 'white' }">I want you</h3>
-      <el-row type="flex" justify="center">
-        <el-col :span="12">
-          <el-button>Close</el-button>
-        </el-col>
-        <el-col :span="12">
-          <el-button>Far</el-button>
-        </el-col>
-      </el-row>
-      <vue-p5 v-on="{ setup, draw, windowresized }" />
-    </el-col>
+    <div ref="wrapper" class="container">
+      <el-col :xs="24" :md="24">
+        <h3>I WANT YOU</h3>
+        <el-row :gutter="10" class="button-container">
+          <span v-for="(button, index) in ['CLOSE', 'FAR']" :key="button.key">
+            <el-col :xs="12" :sm="12" :md="12">
+              <div @mouseover="handleMouseOver">
+                <el-button @click="() => handleClick(index)">{{
+                  button
+                }}</el-button>
+              </div>
+            </el-col>
+          </span>
+        </el-row>
+        <el-row class="p5-container">
+          <vue-p5 v-on="{ setup, draw, windowresized }" />
+        </el-row>
+        <!-- <el-row>
+          <el-col
+            :span="24"
+            :style="{
+              border: '1px solid white',
+              height: '1.5rem',
+              margin: '10px 0px 5px 0px'
+            }"
+          >
+          </el-col>
+          <h5 style="color: white; font-weight: 300">Proximity Indicator</h5>
+        </el-row> -->
+      </el-col>
+    </div>
   </el-row>
 </template>
 
@@ -32,41 +51,42 @@ export default {
     }
   },
   mounted() {
-    // console.log(this.$refs.wrapper)
+    // console.log(this.$refs.wrapper.offsetWidth)
   },
   methods: {
+    handleMouseOver() {
+      console.log('mouse hovering')
+    },
+    handleClick(e) {
+      console.log('button clicked', e)
+    },
     setup(sk) {
-      sk.createCanvas(
-        this.$refs.wrapper.$el.offsetWidth * this.sizeFactor,
-        this.$refs.wrapper.$el.offsetWidth * this.sizeFactor
-      )
-      sk.frameRate()
+      sk.createCanvas(400, 400)
+      // sk.frameRate()
       this.circleOne = this.createCircle(sk, sk.width * 0.3, sk.height / 2)
       this.circleTwo = this.createCircle(sk, sk.width * 0.7, sk.height / 2)
+      // this.drawBorders(sk)
+      this.drawLimiters(sk, 0.6)
     },
     draw(sk) {
       this.drawBorders(sk)
-      this.drawLimiters(sk, 0.6)
-
+      // this.drawLimiters(sk, 0.6)
       // this.circleOne.addNoise(sk, 0.001)
       // this.circleOne.update(sk)
       this.circleOne.checkEdges(sk)
-
       // this.circleOne.roam(sk, 0.5, 8)
       this.circleOne.display(sk)
-
       // this.circleTwo.addNoise(sk, 0.001)
       // this.circleTwo.update(sk)
       // this.circleTwo.checkEdges(sk)
       this.circleTwo.display(sk)
-
       this.drawConnector(sk, this.circleOne.location, this.circleTwo.location)
       // sk.noLoop()
     },
     drawBorders(sk) {
       // sk.noFill()
-      sk.fill(0, 50)
-      sk.strokeWeight(1.2)
+      sk.fill(17, 2, 19, 10)
+      sk.strokeWeight(2)
       sk.stroke(255)
       sk.rectMode(sk.CENTER)
       sk.rect(sk.width / 2, sk.height / 2, sk.width, sk.height)
@@ -96,6 +116,7 @@ export default {
         limit: 3,
         display: sk => {
           sk.stroke(255)
+          sk.strokeWeight(0.8)
           sk.noFill()
           sk.ellipseMode(sk.CENTER)
           sk.ellipse(
@@ -160,8 +181,39 @@ export default {
 </script>
 
 <style scoped>
-.el-button {
+.el-col .el-button {
   width: 100%;
   border-radius: 0px;
+  color: white;
+  border: 1px solid white;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: 1.2rem;
+  font-weight: 300;
+  height: 3rem;
+}
+.el-col .el-button:hover {
+  background-color: white;
+  color: #110213;
+  font-style: italic;
+  border: 0px;
+}
+
+.el-row.button-container {
+  margin: 18px 0px 30px 0px;
+}
+
+h3 {
+  font-family: Josefin Sans;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 2rem;
+  text-align: center;
+  color: white;
+}
+
+div.container {
+  margin-top: 50px;
+  min-height: 100vh;
 }
 </style>

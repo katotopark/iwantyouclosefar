@@ -5,9 +5,13 @@
 </template>
 
 <style>
+@import url('https://fonts.googleapis.com/css?family=Josefin+Sans:300,300i,400,400i,600,600i');
+
 html {
-  font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif; */
+  font-family: Josefin Sans, sans-serif;
+
   font-size: 16px;
   word-spacing: 1px;
   -ms-text-size-adjust: 100%;
@@ -22,7 +26,11 @@ html {
 *:after {
   box-sizing: border-box;
   margin: 0;
-  background-color: black;
+}
+.el-row,
+.el-row--flex.is-justify-center,
+.el-row--flex {
+  background-color: #110213;
 }
 
 .button--green {
