@@ -2,13 +2,13 @@
   <el-row type="flex" justify="center">
     <div ref="wrapper" class="container">
       <el-col :xs="24" :md="24">
-        <span v-if="!showGame">
+        <span v-if="!true">
           <el-row justify="center" type="flex">
             <el-col :sm="12">
               <el-button
-                @click="showGame = !showGame"
-                style="display: inline-block; height: auto; white-space: normal; line-height: 30px"
                 id="hello"
+                style="display: inline-block; height: auto; white-space: normal; line-height: 30px"
+                @click="showGame = !showGame"
               >
                 {{ hello }}
               </el-button>
@@ -42,19 +42,6 @@
             <vue-p5 v-on="{ setup, draw, windowresized }" />
           </el-row>
         </span>
-
-        <!-- <el-row>
-            <el-col
-              :span="24"
-              :style="{
-                border: '1px solid white',
-                height: '1.5rem',
-                margin: '10px 0px 5px 0px'
-              }"
-            >
-            </el-col>
-            <h5 style="color: white; font-weight: 300">Proximity Indicator</h5>
-          </el-row> -->
       </el-col>
     </div>
   </el-row>
@@ -63,6 +50,7 @@
 <script>
 import VueP5 from 'vue-p5'
 import Victor from 'victor'
+import Circle from '../components/Circle'
 
 export default {
   components: {
@@ -70,12 +58,14 @@ export default {
   },
   data() {
     return {
+      cirk1: null,
+      cirk2: null,
       sizeFactor: 0.85,
       circleSize: 150,
       circleOne: null,
       circleTwo: null,
       showGame: false,
-      hello: `Two entities roam about in an orthogonal world. But they have yet to discover their dynamics, the frictions, and the collisions, the overlaps, and the confusions.`
+      hello: `Two separate entities just roam about in an orthogonal world. But they have yet to discover their dynamics, the frictions, and the collisions, the overlaps, and the confusions.`
     }
   },
   mounted() {
@@ -91,6 +81,19 @@ export default {
     setup(sk) {
       sk.createCanvas(400, 400)
       // sk.frameRate(10)
+      this.cirk1 = new Circle(
+        sk,
+        sk.width * 0.3,
+        sk.height / 2,
+        this.circleSize
+      )
+      this.cirk2 = new Circle(
+        sk,
+        sk.width * 0.7,
+        sk.height / 2,
+        this.circleSize
+      )
+
       this.circleOne = this.createCircle(sk, sk.width * 0.3, sk.height / 2)
       this.circleTwo = this.createCircle(sk, sk.width * 0.7, sk.height / 2)
       // this.drawBorders(sk)
@@ -99,10 +102,20 @@ export default {
     draw(sk) {
       if (sk.frameCount % 5 === 0) this.drawBorders(sk)
 
+      this.cirk1.display()
+      this.cirk1.roam(5, 0.002)
+      this.cirk1.applyForce(this.cirk1.seek(Victor(100, 400), 1))
+      this.cirk1.checkEdges()
+      this.cirk1.update()
+
+      this.cirk2.display()
+      this.cirk2.update()
+
       // this.circleOne.applyForce(sk, this.circleOne.separate(sk, this.circleTwo))
-      // const seek = this.circleOne.seek(sk, Victor(0, 0))
+      // console.log("circle one's location is", this.circleOne.location)
+      // const seek = this.circleOne.seek(sk, Victor(100, 100))
       // this.circleOne.applyForce(sk, seek)
-      this.circleOne.roam(sk, 0.001, 200)
+      // this.circleOne.roam(sk, 0.001, 10)
       this.circleOne.update(sk)
       this.circleOne.checkEdges(sk)
       this.circleOne.display(sk)
@@ -111,11 +124,8 @@ export default {
       this.circleTwo.checkEdges(sk)
       this.circleTwo.display(sk)
 
-      const loc = this.circleTwo.location
-      console.log(loc)
-
       this.drawConnector(sk, this.circleOne.location, this.circleTwo.location)
-      sk.noLoop()
+      // sk.noLoop()
     },
     drawBorders(sk) {
       // sk.noFill()
@@ -148,7 +158,7 @@ export default {
         acceleration: new Victor(),
         nOff: new Victor(Math.random() * 10, Math.random() * 10),
         limit: 3,
-        mass: 2,
+        mass: 0.2,
         display: sk => {
           sk.stroke(255, 100)
           sk.strokeWeight(0.8)
@@ -165,27 +175,28 @@ export default {
           circle.velocity.add(circle.acceleration)
           circle.velocity.limit(circle.limit, 2)
           circle.location.add(circle.velocity)
-          circle.acceleration.multiply(0)
+          circle.acceleration.multiply(Victor(0, 0))
         },
         applyForce: (sk, force) => {
           const f = force.divide(Victor(circle.mass, circle.mass))
           circle.acceleration.add(f)
         },
         seek: (sk, target) => {
-          const maxSpeed = 2
-          const maxForce = 1
+          const maxSpeed = -2
+          const maxForce = -1
           const desired = target.subtract(circle.location)
           desired.normalize()
           desired.multiply(Victor(maxSpeed, maxSpeed))
 
           const steer = desired.subtract(circle.velocity)
-          steer.limit(maxForce, 1)
+          // console.log('steer vector is', steer)
+          steer.limit(maxForce, -8)
           return steer
         },
         separate: (sk, _circle) => {
           const maxSpeed = 100
           const maxForce = 50
-          const desiredSeparation = 100
+          const desiredSeparation = 400
           const steer = new Victor()
           let count = 0
 
@@ -206,7 +217,7 @@ export default {
             steer.subtract(circle.velocity)
             steer.limit(maxForce, 20)
           }
-          console.log(steer)
+          console.log('steer vector is', steer)
           return steer
         },
         roam: (sk, speed, scale) => {
@@ -218,7 +229,7 @@ export default {
           circle.velocity.copy(circle.acceleration)
           circle.velocity.multiply(Victor(speed, speed))
           circle.location.add(circle.velocity)
-          circle.nOff.add(Victor(50, 50))
+          circle.nOff.add(Victor(5, 5))
         },
         checkEdges: sk => {
           if (circle.location.x - this.circleSize / 2 <= 0) {
