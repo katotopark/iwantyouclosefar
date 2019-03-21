@@ -2,7 +2,7 @@
   <el-row type="flex" justify="center">
     <div ref="wrapper" class="container">
       <el-col :xs="24" :md="24">
-        <span v-if="!true">
+        <span v-if="!showGame">
           <el-row justify="center" type="flex">
             <el-col :sm="12">
               <el-button
