@@ -52,6 +52,7 @@
 
 <script>
 import VueP5 from 'vue-p5'
+// import Victor from 'victor'
 import ProgressBar from '../components/ProgressBar.vue'
 import Circle from '../components/Circle'
 
@@ -67,9 +68,11 @@ export default {
       distance: 0,
       sizeFactor: 0.85,
       circleSize: 130,
-      seekSpeed: 0.025,
+      seekSpeed: 0.0,
+      frictionConstant: 0.001,
+      multiplier: 0.7,
       showGame: false,
-      hello: `Two separate entities just roam about in an orthogonal world. But they have yet to discover their dynamics, the frictions, and the collisions, the overlaps, and the confusions.`
+      hello: `Two entities just roam about in an orthogonal world. But they have yet to discover their dynamics, the frictions, and the collisions, the borders, the overlaps, and the confusions.`
     }
   },
   methods: {
@@ -95,20 +98,25 @@ export default {
         this.circleSize
       )
 
-      this.drawLimiters(sk, 0.6)
+      this.drawLimiters(sk, this.multiplier)
     },
     draw(sk) {
-      if (sk.frameCount % 50 === 0) this.drawBorders(sk)
+      if (sk.frameCount % 50 === 0)
+        this.drawBorders(sk) && this.drawLimiters(sk, this.multiplier)
 
       this.cirk1.applyForce(
         this.cirk1.seek(this.cirk2.location, this.seekSpeed / 2)
       )
-      this.cirk1.applyForce(this.cirk1.roam(0.8))
+      this.cirk1.applyForce(this.cirk1.roam(2.2))
+      if (this.cirk1.location.x >= sk.width * this.multiplier)
+        this.cirk1.applyForce(this.cirk1.doFriction(this.frictionConstant))
       this.cirk1.checkEdges()
       this.cirk1.update()
       this.cirk1.display()
 
-      this.cirk2.applyForce(this.cirk2.roam(0.7))
+      this.cirk2.applyForce(this.cirk2.roam(1.2))
+      if (this.cirk2.location.x <= sk.width * (1 - this.multiplier))
+        this.cirk2.applyForce(this.cirk2.doFriction(this.frictionConstant))
       this.cirk2.checkEdges()
       this.cirk2.update()
       this.cirk2.display()
@@ -137,7 +145,7 @@ export default {
       )
     },
     drawConnector(sk, vec1, vec2) {
-      sk.stroke(255)
+      sk.stroke(17 * 2, 2 * 2, 19 * 2, 100)
       sk.strokeWeight(0.8)
       sk.line(vec1.x, vec1.y, vec2.x, vec2.y)
     }
@@ -153,9 +161,9 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.8);
   background-color: transparent;
   font-family: inherit;
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: 300;
-  height: 3rem;
+  height: 2.6rem;
 }
 .el-button#naber {
   width: 100%;
@@ -165,9 +173,9 @@ export default {
   background-color: transparent;
   font-family: inherit;
   font-style: italic;
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 300;
-  height: 3rem;
+  height: 2.6rem;
 }
 .el-button#hello:hover {
   background-color: white;

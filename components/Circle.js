@@ -47,12 +47,21 @@ class Circle {
   roam(factor) {
     const sk = this.sk
     const vec = new Victor(
-      sk.map(sk.noise(this.nOff.x), 0, 1, -0.005, 0.005),
-      sk.map(sk.noise(this.nOff.y), 0, 1, -0.005, 0.005)
+      sk.map(sk.noise(this.nOff.x), 0, 1, -0.015, 0.015),
+      sk.map(sk.noise(this.nOff.y), 0, 1, -0.015, 0.015)
     )
     this.nOff.add(Victor(0.001, 0.001))
     vec.multiply(Victor(factor, factor))
     return vec
+  }
+  doFriction(c) {
+    const friction = this.velocity.clone()
+
+    friction.multiply(Victor(-1, -1))
+    friction.normalize()
+    friction.multiply(Victor(c, c))
+
+    return friction
   }
   checkEdges() {
     const sk = this.sk
