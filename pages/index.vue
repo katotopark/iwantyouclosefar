@@ -39,7 +39,10 @@
             </span>
           </el-row>
           <el-row class="p5-container">
-            <vue-p5 v-on="{ setup, draw, windowresized }" />
+            <vue-p5 v-on="{ setup, draw }" />
+          </el-row>
+          <el-row class="progress-bar">
+            <progress-bar :distance="distance" />
           </el-row>
         </span>
       </el-col>
@@ -49,38 +52,36 @@
 
 <script>
 import VueP5 from 'vue-p5'
-import Victor from 'victor'
+import ProgressBar from '../components/ProgressBar.vue'
 import Circle from '../components/Circle'
 
 export default {
   components: {
-    VueP5
+    VueP5,
+    ProgressBar
   },
   data() {
     return {
       cirk1: null,
       cirk2: null,
+      distance: 0,
       sizeFactor: 0.85,
-      circleSize: 150,
-      circleOne: null,
-      circleTwo: null,
+      circleSize: 130,
+      seekSpeed: 0.025,
       showGame: false,
       hello: `Two separate entities just roam about in an orthogonal world. But they have yet to discover their dynamics, the frictions, and the collisions, the overlaps, and the confusions.`
     }
-  },
-  mounted() {
-    // console.log(this.$refs.wrapper.offsetWidth)
   },
   methods: {
     handleMouseOver() {
       console.log('mouse hovering')
     },
     handleClick(e) {
-      console.log('button clicked', e)
+      if (e === 0) this.seekSpeed += 0.25
+      else if (e === 2) this.seekSpeed -= 0.25
     },
     setup(sk) {
       sk.createCanvas(400, 400)
-      // sk.frameRate(10)
       this.cirk1 = new Circle(
         sk,
         sk.width * 0.3,
@@ -94,37 +95,26 @@ export default {
         this.circleSize
       )
 
-      this.circleOne = this.createCircle(sk, sk.width * 0.3, sk.height / 2)
-      this.circleTwo = this.createCircle(sk, sk.width * 0.7, sk.height / 2)
-      // this.drawBorders(sk)
       this.drawLimiters(sk, 0.6)
     },
     draw(sk) {
-      if (sk.frameCount % 5 === 0) this.drawBorders(sk)
+      if (sk.frameCount % 50 === 0) this.drawBorders(sk)
 
-      this.cirk1.display()
-      this.cirk1.roam(5, 0.002)
-      this.cirk1.applyForce(this.cirk1.seek(Victor(100, 400), 1))
+      this.cirk1.applyForce(
+        this.cirk1.seek(this.cirk2.location, this.seekSpeed / 2)
+      )
+      this.cirk1.applyForce(this.cirk1.roam(0.8))
       this.cirk1.checkEdges()
       this.cirk1.update()
+      this.cirk1.display()
 
-      this.cirk2.display()
+      this.cirk2.applyForce(this.cirk2.roam(0.7))
+      this.cirk2.checkEdges()
       this.cirk2.update()
+      this.cirk2.display()
 
-      // this.circleOne.applyForce(sk, this.circleOne.separate(sk, this.circleTwo))
-      // console.log("circle one's location is", this.circleOne.location)
-      // const seek = this.circleOne.seek(sk, Victor(100, 100))
-      // this.circleOne.applyForce(sk, seek)
-      // this.circleOne.roam(sk, 0.001, 10)
-      this.circleOne.update(sk)
-      this.circleOne.checkEdges(sk)
-      this.circleOne.display(sk)
-      this.circleTwo.roam(sk, 0.001, 200)
-      this.circleTwo.update(sk)
-      this.circleTwo.checkEdges(sk)
-      this.circleTwo.display(sk)
-
-      this.drawConnector(sk, this.circleOne.location, this.circleTwo.location)
+      this.drawConnector(sk, this.cirk1.location, this.cirk2.location)
+      this.distance = this.cirk1.location.distance(this.cirk2.location)
       // sk.noLoop()
     },
     drawBorders(sk) {
@@ -150,112 +140,6 @@ export default {
       sk.stroke(255)
       sk.strokeWeight(0.8)
       sk.line(vec1.x, vec1.y, vec2.x, vec2.y)
-    },
-    createCircle(sk, initialLocX, initialLocY) {
-      const circle = {
-        location: new Victor(initialLocX, initialLocY),
-        velocity: new Victor(),
-        acceleration: new Victor(),
-        nOff: new Victor(Math.random() * 10, Math.random() * 10),
-        limit: 3,
-        mass: 0.2,
-        display: sk => {
-          sk.stroke(255, 100)
-          sk.strokeWeight(0.8)
-          sk.noFill()
-          sk.ellipseMode(sk.CENTER)
-          sk.ellipse(
-            circle.location.x,
-            circle.location.y,
-            this.circleSize,
-            this.circleSize
-          )
-        },
-        update: sk => {
-          circle.velocity.add(circle.acceleration)
-          circle.velocity.limit(circle.limit, 2)
-          circle.location.add(circle.velocity)
-          circle.acceleration.multiply(Victor(0, 0))
-        },
-        applyForce: (sk, force) => {
-          const f = force.divide(Victor(circle.mass, circle.mass))
-          circle.acceleration.add(f)
-        },
-        seek: (sk, target) => {
-          const maxSpeed = -2
-          const maxForce = -1
-          const desired = target.subtract(circle.location)
-          desired.normalize()
-          desired.multiply(Victor(maxSpeed, maxSpeed))
-
-          const steer = desired.subtract(circle.velocity)
-          // console.log('steer vector is', steer)
-          steer.limit(maxForce, -8)
-          return steer
-        },
-        separate: (sk, _circle) => {
-          const maxSpeed = 100
-          const maxForce = 50
-          const desiredSeparation = 400
-          const steer = new Victor()
-          let count = 0
-
-          const d = circle.location.distance(_circle.location)
-          console.log(d)
-          if (d > 0 && d < desiredSeparation) {
-            const diff = circle.location.subtract(_circle.location)
-            console.log('diff is', diff)
-            diff.normalize()
-            diff.divide(d)
-            steer.add(diff)
-            count++
-          }
-          if (count > 0) steer.divide(Victor(count, count))
-          if (steer.length() > 0) {
-            steer.normalize()
-            steer.multiply(Victor(maxSpeed, maxSpeed))
-            steer.subtract(circle.velocity)
-            steer.limit(maxForce, 20)
-          }
-          console.log('steer vector is', steer)
-          return steer
-        },
-        roam: (sk, speed, scale) => {
-          const angle =
-            sk.noise(circle.nOff.x / scale, circle.nOff.y / scale) *
-            sk.TWO_PI *
-            scale
-          circle.acceleration.copy(Victor(sk.cos(angle), sk.sin(angle)))
-          circle.velocity.copy(circle.acceleration)
-          circle.velocity.multiply(Victor(speed, speed))
-          circle.location.add(circle.velocity)
-          circle.nOff.add(Victor(5, 5))
-        },
-        checkEdges: sk => {
-          if (circle.location.x - this.circleSize / 2 <= 0) {
-            circle.location.x = this.circleSize / 2
-            circle.velocity.multiply(Victor(-1, -1))
-          } else if (circle.location.x + this.circleSize / 2 >= sk.width) {
-            circle.location.x = sk.width - this.circleSize / 2
-            circle.velocity.multiply(Victor(-1, -1))
-          }
-          if (circle.location.y - this.circleSize / 2 <= 0) {
-            circle.location.y = this.circleSize / 2
-            circle.velocity.multiply(Victor(-1, -1))
-          } else if (circle.location.y + this.circleSize / 2 >= sk.height) {
-            circle.location.y = sk.height - this.circleSize / 2
-            circle.velocity.multiply(Victor(-1, -1))
-          }
-        }
-      }
-      return circle
-    },
-    windowresized(sk) {
-      console.log('resizing')
-      sk.resizeCanvas(
-        this.$refs.wrapper.$el.offsetWidth * this.sizeFactor,
-        this.$refs.wrapper.$el.offsetWidth * this.sizeFactor
-      )
     }
   }
 }
@@ -313,5 +197,8 @@ h3 {
 div.container {
   margin-top: 50px;
   min-height: 100vh;
+}
+.el-row.progress-bar {
+  margin-top: 20px;
 }
 </style>

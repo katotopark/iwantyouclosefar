@@ -15,7 +15,7 @@ class Circle {
   }
   display() {
     const sk = this.sk
-    sk.stroke(0, 255, 0, 100)
+    sk.stroke(255, 100)
     sk.strokeWeight(0.8)
     sk.noFill()
     sk.ellipseMode(sk.CENTER)
@@ -32,9 +32,11 @@ class Circle {
     this.acceleration.add(f)
   }
   seek(target, speed) {
+    const t = new Victor(target.x, target.y)
     const maxSpeed = speed
     const maxForce = 1
-    const desired = target.subtract(this.location)
+
+    const desired = t.subtract(this.location)
     desired.normalize()
     desired.multiply(Victor(maxSpeed, maxSpeed))
 
@@ -42,18 +44,15 @@ class Circle {
     steer.limit(maxForce, 1)
     return steer
   }
-  roam(scale, speed) {
+  roam(factor) {
     const sk = this.sk
-    const angle =
-      sk.noise(this.location.x / scale, this.location.y / scale) *
-      sk.TWO_PI *
-      scale
-    this.acceleration.x = sk.cos(angle)
-    this.acceleration.y = sk.sin(angle)
-
-    this.velocity.copy(this.acceleration)
-    this.velocity.multiply(Victor(speed, speed))
-    this.location.add(this.velocity)
+    const vec = new Victor(
+      sk.map(sk.noise(this.nOff.x), 0, 1, -0.005, 0.005),
+      sk.map(sk.noise(this.nOff.y), 0, 1, -0.005, 0.005)
+    )
+    this.nOff.add(Victor(0.001, 0.001))
+    vec.multiply(Victor(factor, factor))
+    return vec
   }
   checkEdges() {
     const sk = this.sk
