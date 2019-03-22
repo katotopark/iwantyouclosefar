@@ -38,30 +38,48 @@ export default {
   },
   methods: {
     setup(sk) {
-      sk.createCanvas(402, 30)
-      this.lerpFrom = sk.color(79, 18, 40, 100)
-      this.lerpTo = sk.color(149, 167, 187, 100)
+      sk.createCanvas(400, 20)
+      this.lerpFrom = sk.color(79, 18, 40, 255)
+      this.lerpTo = sk.color(149, 167, 187, 255)
     },
     draw(sk) {
-      const mapRatio = sk.map(this.distance, 0, 350, 0, 1)
+      const mapRatio = sk.map(this.distance, 0, 370, 0, 1)
       const fillCol = sk.lerpColor(this.lerpFrom, this.lerpTo, mapRatio)
-      sk.noStroke()
-      sk.fill(fillCol, 50)
-      sk.rectMode(sk.CORNER)
-      sk.rect(1, 6, sk.map(this.distance, 0, 350, 0, 400), 19)
+      sk.background(fillCol, 200)
+      sk.stroke(200, 150)
+      sk.line(
+        sk.map(this.distance, 0, 370, 0, 400),
+        0,
+        sk.map(this.distance, 0, 370, 0, 400),
+        20
+      )
 
-      sk.stroke(150)
+      sk.noStroke()
       sk.noFill()
       sk.rectMode(sk.CENTER)
       sk.rect(sk.width / 2, sk.height / 2, 400, 20)
+
+      // this.drawLines(sk, 20)
+    },
+    drawLines(sk, gap) {
+      sk.stroke(200, 50)
+      // for (let i = 1; i < 20; i++) {
+      //   sk.line(i * gap, 0, i * gap, 5)
+      //   sk.line(i * gap, 15, i * gap, 20)
+      // }
+      for (let i = 1; i < 40; i++) {
+        sk.line((i * gap) / 2, 0, (i * gap) / 2, 2)
+        sk.line((i * gap) / 2, 18, (i * gap) / 2, 20)
+      }
     }
   }
 }
 </script>
 <style scoped>
-h3 {
+div h3 {
   color: white;
   font-weight: 300;
   font-size: 0.9rem;
+  margin-bottom: 5px;
 }
 </style>

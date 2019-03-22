@@ -2,15 +2,15 @@
   <el-row type="flex" justify="center">
     <div ref="wrapper" class="container">
       <el-col :xs="24" :md="24">
-        <span v-if="!showGame">
+        <span v-if="!true">
           <el-row justify="center" type="flex">
             <el-col :sm="12">
               <el-button
-                id="hello"
+                id="introMsg"
                 style="display: inline-block; height: auto; white-space: normal; line-height: 30px"
                 @click="showGame = !showGame"
               >
-                {{ hello }}
+                {{ introMsg }}
               </el-button>
             </el-col>
           </el-row>
@@ -44,6 +44,9 @@
           <el-row class="progress-bar">
             <progress-bar :distance="distance" />
           </el-row>
+          <el-row id="bday-msg">
+            <h5>*happy 30th, dudak</h5>
+          </el-row>
         </span>
       </el-col>
     </div>
@@ -52,7 +55,6 @@
 
 <script>
 import VueP5 from 'vue-p5'
-// import Victor from 'victor'
 import ProgressBar from '../components/ProgressBar.vue'
 import Circle from '../components/Circle'
 
@@ -72,7 +74,7 @@ export default {
       frictionConstant: 0.001,
       multiplier: 0.7,
       showGame: false,
-      hello: `Two entities just roam about in an orthogonal world. But they have yet to discover their dynamics, the frictions, and the collisions, the borders, the overlaps, and the confusions.`
+      introMsg: `Two entities just roam about in an orthogonal world. But they have yet to discover their dynamics, the frictions, and the collisions, the borders, the overlaps, and the confusions.`
     }
   },
   methods: {
@@ -101,6 +103,7 @@ export default {
       this.drawLimiters(sk, this.multiplier)
     },
     draw(sk) {
+      sk.drawingContext.setLineDash([0, 0])
       if (sk.frameCount % 50 === 0)
         this.drawBorders(sk) && this.drawLimiters(sk, this.multiplier)
 
@@ -146,7 +149,8 @@ export default {
     },
     drawConnector(sk, vec1, vec2) {
       sk.stroke(17 * 2, 2 * 2, 19 * 2, 100)
-      sk.strokeWeight(0.8)
+      sk.strokeWeight(0.75)
+      sk.drawingContext.setLineDash([1, 2])
       sk.line(vec1.x, vec1.y, vec2.x, vec2.y)
     }
   }
@@ -177,12 +181,12 @@ export default {
   font-weight: 300;
   height: 2.6rem;
 }
-.el-button#hello:hover {
+.el-button#introMsg:hover {
   background-color: white;
   color: #110213;
   border: 0px;
 }
-.el-col .el-button:hover:not([id='naber']):not([id='hello']) {
+.el-col .el-button:hover:not([id='naber']):not([id='introMsg']) {
   background-color: white;
   color: #110213;
   font-style: italic;
@@ -208,5 +212,13 @@ div.container {
 }
 .el-row.progress-bar {
   margin-top: 20px;
+}
+#bday-msg h5 {
+  color: white;
+  font-weight: 300;
+  font-size: 0.9rem;
+  bottom: 10px;
+  right: 10px;
+  position: fixed;
 }
 </style>
