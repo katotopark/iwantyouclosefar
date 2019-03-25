@@ -2,9 +2,9 @@
   <el-row type="flex" justify="center">
     <div ref="wrapper" class="container">
       <el-col :xs="24" :md="24">
-        <span v-if="!true">
+        <span v-if="!showGame">
           <el-row justify="center" type="flex">
-            <el-col :sm="12">
+            <el-col :sm="10">
               <el-button
                 id="introMsg"
                 style="display: inline-block; height: auto; white-space: normal; line-height: 30px"
@@ -45,7 +45,7 @@
             <progress-bar :distance="distance" />
           </el-row>
           <el-row id="bday-msg">
-            <h5>*happy 30th, dudak</h5>
+            <h5>*happy 30th, dudak.</h5>
           </el-row>
         </span>
       </el-col>
@@ -55,6 +55,7 @@
 
 <script>
 import VueP5 from 'vue-p5'
+import Victor from 'victor'
 import ProgressBar from '../components/ProgressBar.vue'
 import Circle from '../components/Circle'
 
@@ -71,7 +72,7 @@ export default {
       sizeFactor: 0.85,
       circleSize: 130,
       seekSpeed: 0.0,
-      frictionConstant: 0.001,
+      frictionConstant: 0.0005,
       multiplier: 0.7,
       showGame: false,
       introMsg: `Two entities just roam about in an orthogonal world. But they have yet to discover their dynamics, the frictions, and the collisions, the borders, the overlaps, and the confusions.`
@@ -104,25 +105,30 @@ export default {
     },
     draw(sk) {
       sk.drawingContext.setLineDash([0, 0])
+
       if (sk.frameCount % 50 === 0)
         this.drawBorders(sk) && this.drawLimiters(sk, this.multiplier)
 
       this.cirk1.applyForce(
-        this.cirk1.seek(this.cirk2.location, this.seekSpeed / 2)
+        this.cirk1.seek(Victor(sk.pmouseX, sk.pmouseY), 0.75)
+      )
+      this.cirk1.applyForce(
+        this.cirk1.seek(
+          Victor(this.cirk2.location.x, this.cirk2.location.y),
+          this.seekSpeed / 2
+        )
       )
       this.cirk1.applyForce(this.cirk1.roam(2.2))
+      this.cirk1.run()
+
       if (this.cirk1.location.x >= sk.width * this.multiplier)
         this.cirk1.applyForce(this.cirk1.doFriction(this.frictionConstant))
-      this.cirk1.checkEdges()
-      this.cirk1.update()
-      this.cirk1.display()
 
       this.cirk2.applyForce(this.cirk2.roam(1.2))
       if (this.cirk2.location.x <= sk.width * (1 - this.multiplier))
         this.cirk2.applyForce(this.cirk2.doFriction(this.frictionConstant))
-      this.cirk2.checkEdges()
-      this.cirk2.update()
-      this.cirk2.display()
+
+      this.cirk2.run()
 
       this.drawConnector(sk, this.cirk1.location, this.cirk2.location)
       this.distance = this.cirk1.location.distance(this.cirk2.location)

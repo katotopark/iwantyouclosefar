@@ -1,10 +1,9 @@
 <template>
   <div>
     <h3>
-      PROXIMITY<span> - {{ Math.trunc(distance) }}x </span
-      ><span v-if="proximityMessage.length !== 0">
+      PROXIMITY<span v-if="proximityMessage.length !== 0">
         - [ {{ proximityMessage }} ]</span
-      >
+      ><span> - {{ Math.trunc(distance) }}x </span>
     </h3>
     <vue-p5 v-on="{ setup, draw }" />
   </div>

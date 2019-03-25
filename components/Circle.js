@@ -21,6 +21,11 @@ class Circle {
     sk.ellipseMode(sk.CENTER)
     sk.ellipse(this.location.x, this.location.y, this.size, this.size)
   }
+  run() {
+    this.checkEdges()
+    this.update()
+    this.display()
+  }
   update() {
     this.velocity.add(this.acceleration)
     this.velocity.limit(this.limit, 2)
