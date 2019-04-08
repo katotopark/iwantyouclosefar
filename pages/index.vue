@@ -45,7 +45,7 @@
             <progress-bar :distance="distance" />
           </el-row>
           <el-row id="bday-msg">
-            <h5>*happy 30th, dudak.</h5>
+            <h5>*happy 29th, dudak.</h5>
           </el-row>
         </span>
       </el-col>
@@ -79,9 +79,7 @@ export default {
     }
   },
   methods: {
-    handleMouseOver() {
-      console.log('mouse hovering')
-    },
+    handleMouseOver() {},
     handleClick(e) {
       if (e === 0) this.seekSpeed += 0.25
       else if (e === 2) this.seekSpeed -= 0.25
