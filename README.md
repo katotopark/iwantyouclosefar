@@ -1,22 +1,3 @@
-# thirtieth
+# I want you close (yet) far
 
-> happy birthday dudak
-
-## Build Setup
-
-``` bash
-# install dependencies
-$ npm install
-
-# serve with hot reload at localhost:3000
-$ npm run dev
-
-# build for production and launch server
-$ npm run build
-$ npm start
-
-# generate static project
-$ npm run generate
-```
-
-For detailed explanation on how things work, checkout [Nuxt.js docs](https://nuxtjs.org).
+> Two entities just roam about in an orthogonal world. But they have yet to discover their dynamics, the frictions, and the collisions, the borders, the overlaps, and the confusions.
